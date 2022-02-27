@@ -1,0 +1,68 @@
+@model EditUserViewModel
+
+@{
+    ViewData["Title"] = "Edit user";
+}
+
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card">
+            <h5 class="card-header">Edit user</h5>
+            <div class="card-body">
+                <form asp-action="EditUser">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="form-group">
+                        <label asp-for="UserName"></label>
+                        <input asp-for="UserName" class="form-control" />
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Email"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="PhoneNumber"></label>
+                        <input asp-for="PhoneNumber" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Gender"></label>
+                        <select asp-for="Gender" class="form-control"
+                            asp-items="Html.GetEnumSelectList<Gender>()"></select>
+                        <span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Department"></label>
+                        <select asp-for="Department" class="form-control"
+                            asp-items="Html.GetEnumSelectList<Department>()"></select>
+                        <span asp-validation-for="Department" class="text-danger"></span>
+                    </div>
+
+                    <div class="mt-2 mb-2">
+                        @for (var i = 0; i < Model?.Roles.Count(); i++)
+                        {
+                            <div class="custom-control custom-checkbox">
+                                <input asp-for="@Model.Roles[i].IsAssigned" class="custom-control-input">
+                                <label asp-for="@Model.Roles[i].IsAssigned"
+                                class="custom-control-label">@Model.Roles[i].RoleName</label>
+                                <input asp-for="@Model.Roles[i].RoleId" type="hidden" />
+                                <input asp-for="@Model.Roles[i].RoleName" type="hidden" />
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-3">
+                        <a asp-controller="Admin" asp-action="Users" class="btn btn-link">Users</a>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

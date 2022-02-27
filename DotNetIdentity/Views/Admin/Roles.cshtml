@@ -1,0 +1,43 @@
+@model List<AppRole>
+
+@{
+    ViewData["Title"] = "Roles";
+}
+
+<div class="card">
+    <div class="card-header d-flex">
+        <h5 class="me-auto">Roles</h5>
+        <div class="d-inline-block">
+            <a asp-action="UpsertRole" class="btn btn-primary btn-sm">Add</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Ops</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model ?? new())
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.Name</td>
+                        <td>
+                            <div class="btn-group">
+                                <a asp-action="UpsertRole" asp-route-id="@item.Id"><span
+                                    class="btn btn-sm btn-primary me-2">Edit</span></a>
+                                <form asp-action="DeleteRole" asp-route-id="@item.Id">
+                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

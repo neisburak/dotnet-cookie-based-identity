@@ -1,0 +1,36 @@
+@model List<AppUser>
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<div class="card">
+    <h5 class="card-header">Users</h5>
+    <div class="card-body">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Roles</th>
+                    <th>Ops</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model ?? new())
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.UserName</td>
+                        <td>@item.Email</td>
+                        <td asp-roles="@item.Id"></td>
+                        <td>
+                            <a asp-action="EditUser" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Edit</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,12 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="card">
+    <h5 class="card-header">Dashboard page</h5>
+    <div class="card-body">
+        <h5 class="card-title">Requires authorization</h5>
+        <p class="card-text">This page requires to "Admin" role to access.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Home</a>
+    </div>
+</div>
