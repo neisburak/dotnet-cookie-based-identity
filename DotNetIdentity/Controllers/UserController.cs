@@ -407,6 +407,108 @@ namespace DotNetIdentity.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        public IActionResult FacebookLogin(string returnUrl)
+        {
+            var redirectUrl = Url.Action("ExternalResponse", "User", new { ReturnUrl = returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties("Facebook", redirectUrl);
+            return new ChallengeResult("Facebook", properties);
+        }
+
+        public IActionResult GoogleLogin(string returnUrl)
+        {
+            var redirectUrl = Url.Action("ExternalResponse", "User", new { ReturnUrl = returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+            return new ChallengeResult("Google", properties);
+        }
+
+        public IActionResult MicrosoftLogin(string returnUrl)
+        {
+            var redirectUrl = Url.Action("ExternalResponse", "User", new { ReturnUrl = returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties("Microsoft", redirectUrl);
+            return new ChallengeResult("Microsoft", properties);
+        }
+
+        public async Task<IActionResult> ExternalResponse(string ReturnUrl = "/")
+        {
+            var loginInfo = await _signInManager.GetExternalLoginInfoAsync();
+            if (loginInfo == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var externalLoginResult = await _signInManager.ExternalLoginSignInAsync(loginInfo.LoginProvider, loginInfo.ProviderKey, true);
+            if (externalLoginResult.Succeeded)
+            {
+                return Redirect(ReturnUrl);
+            }
+
+            var user = new AppUser
+            {
+                Email = loginInfo.Principal.FindFirst(ClaimTypes.Email)?.Value
+            };
+            var externalUserId = loginInfo.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (loginInfo.Principal.HasClaim(c => c.Type == ClaimTypes.Name))
+            {
+                var userName = loginInfo.Principal.FindFirst(ClaimTypes.Name)?.Value;
+                if (userName != null)
+                {
+                    userName = userName.Replace(' ', '-').ToLower() + externalUserId?.Substring(0, 5);
+                    user.UserName = userName;
+                }
+                else
+                {
+                    user.UserName = user.Email;
+                }
+            }
+            else
+            {
+                user.UserName = user.Email;
+            }
+
+            var existUser = await _userManager.FindByEmailAsync(user.Email);
+            if (existUser == null)
+            {
+                var createResult = await _userManager.CreateAsync(user);
+                if (createResult.Succeeded)
+                {
+                    var loginResult = await _userManager.AddLoginAsync(user, loginInfo);
+                    if (loginResult.Succeeded)
+                    {
+                        // await SignInManager.SignInAsync(user, true);
+                        await _signInManager.ExternalLoginSignInAsync(loginInfo.LoginProvider, loginInfo.ProviderKey, true);
+                        return Redirect(ReturnUrl);
+                    }
+                    else
+                    {
+                        loginResult.Errors.ToList().ForEach(f => ModelState.AddModelError(string.Empty, f.Description));
+                    }
+                }
+                else
+                {
+                    createResult.Errors.ToList().ForEach(f => ModelState.AddModelError(string.Empty, f.Description));
+                }
+            }
+            else
+            {
+                var loginResult = await _userManager.AddLoginAsync(existUser, loginInfo);
+                if (loginResult.Succeeded)
+                {
+                    // await SignInManager.SignInAsync(user, true);
+                    await _signInManager.ExternalLoginSignInAsync(loginInfo.LoginProvider, loginInfo.ProviderKey, true);
+                    return Redirect(ReturnUrl);
+                }
+                else
+                {
+                    loginResult.Errors.ToList().ForEach(f => ModelState.AddModelError(string.Empty, f.Description));
+                }
+            }
+
+            var errors = ModelState.Values.SelectMany(s => s.Errors).Select(s => s.ErrorMessage).ToList();
+
+            return View("Error", errors);
+        }
+
         public async Task ClaimsPrincipalExample()
         {
             var licenceClaims = new List<Claim>
@@ -428,7 +530,9 @@ namespace DotNetIdentity.Controllers
 
             var userPrincipal = new ClaimsPrincipal(new[] { licenceIdentity, passportIdentity });
 
-            await HttpContext.SignInAsync(userPrincipal);
+            var authenticationProperties = new AuthenticationProperties { IsPersistent = true };
+
+            await HttpContext.SignInAsync(userPrincipal, authenticationProperties);
         }
     }
 }

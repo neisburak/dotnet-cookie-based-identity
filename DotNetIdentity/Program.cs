@@ -68,6 +68,24 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
 });
 
+builder.Services.AddAuthentication()
+.AddFacebook(options =>
+{
+    options.AppId = builder.Configuration.GetValue<string>("ExternalLoginProviders:Facebook:AppId");
+    options.AppSecret = builder.Configuration.GetValue<string>("ExternalLoginProviders:Facebook:AppSecret");
+    // options.CallbackPath = new PathString("/User/FacebookCallback");
+})
+.AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration.GetValue<string>("ExternalLoginProviders:Google:ClientId");
+    options.ClientSecret = builder.Configuration.GetValue<string>("ExternalLoginProviders:Google:ClientSecret");
+})
+.AddMicrosoftAccount(options =>
+{
+    options.ClientId = builder.Configuration.GetValue<string>("ExternalLoginProviders:Microsoft:ClientId");
+    options.ClientSecret = builder.Configuration.GetValue<string>("ExternalLoginProviders:Microsoft:ClientSecret");
+});
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("HrDepartmentPolicy", policy =>
