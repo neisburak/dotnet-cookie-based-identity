@@ -442,33 +442,32 @@ namespace DotNetIdentity.Controllers
                 return Redirect(ReturnUrl);
             }
 
-            var user = new AppUser
-            {
-                Email = loginInfo.Principal.FindFirst(ClaimTypes.Email)?.Value
-            };
             var externalUserId = loginInfo.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var externalEmail = loginInfo.Principal.FindFirst(ClaimTypes.Email)?.Value;
 
-            if (loginInfo.Principal.HasClaim(c => c.Type == ClaimTypes.Name))
+            var existUser = await _userManager.FindByEmailAsync(externalEmail);
+            if (existUser == null)
             {
-                var userName = loginInfo.Principal.FindFirst(ClaimTypes.Name)?.Value;
-                if (userName != null)
+                var user = new AppUser { Email = externalEmail };
+
+                if (loginInfo.Principal.HasClaim(c => c.Type == ClaimTypes.Name))
                 {
-                    userName = userName.Replace(' ', '-').ToLower() + externalUserId?.Substring(0, 5);
-                    user.UserName = userName;
+                    var userName = loginInfo.Principal.FindFirst(ClaimTypes.Name)?.Value;
+                    if (userName != null)
+                    {
+                        userName = userName.Replace(' ', '-').ToLower() + externalUserId?.Substring(0, 5);
+                        user.UserName = userName;
+                    }
+                    else
+                    {
+                        user.UserName = user.Email;
+                    }
                 }
                 else
                 {
                     user.UserName = user.Email;
                 }
-            }
-            else
-            {
-                user.UserName = user.Email;
-            }
 
-            var existUser = await _userManager.FindByEmailAsync(user.Email);
-            if (existUser == null)
-            {
                 var createResult = await _userManager.CreateAsync(user);
                 if (createResult.Succeeded)
                 {
