@@ -30,7 +30,6 @@ namespace DotNetIdentity.Controllers
 
         public async Task<IActionResult> Roles() => View(await _roleManager.Roles.ToListAsync());
 
-        [HttpGet]
         public async Task<IActionResult> UpsertRole(string? id)
         {
             if (id != null)
